@@ -18,7 +18,6 @@ derive instance genericDiscrete     :: Generic (Discrete c)
 
 instance unittedSemiringDiscrete :: UnittedSemiring (Discrete c) Int where
   uzero = Discrete 0
-  uone  = 1
   uadd (Discrete a) (Discrete b) = Discrete (a + b)
   umul (Discrete a) b            = Discrete (a * b)
 
