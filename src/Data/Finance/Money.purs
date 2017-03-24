@@ -5,7 +5,7 @@ module Data.Finance.Money
 
 import Data.Finance.Currency (kind Currency, class Currency, CProxy(..), decimals)
 import Data.Generic (class Generic)
-import Data.UnittedSemiring (class UnittedSemiring)
+import Data.VectorSpace (class VectorSpace)
 import Prelude
 
 -- | An amount of money in the smallest discrete unit of a particular currency.
@@ -16,10 +16,11 @@ derive newtype instance eqDiscrete  :: Eq (Discrete c)
 derive newtype instance ordDiscrete :: Ord (Discrete c)
 derive instance genericDiscrete     :: Generic (Discrete c)
 
-instance unittedSemiringDiscrete :: UnittedSemiring (Discrete c) Int where
-  uzero = Discrete 0
-  uadd (Discrete a) (Discrete b) = Discrete (a + b)
-  umul (Discrete a) b            = Discrete (a * b)
+instance vectorSpaceDiscrete :: VectorSpace (Discrete c) Int where
+  vzero = Discrete 0
+  vadd (Discrete a) (Discrete b) = Discrete (a + b)
+  vsub (Discrete a) (Discrete b) = Discrete (a - b)
+  vmul (Discrete a) b            = Discrete (a * b)
 
 showDiscrete :: ∀ c. (Currency c) => Discrete c -> String
 showDiscrete (Discrete n) = showDiscrete' n (decimals (CProxy :: CProxy c))
