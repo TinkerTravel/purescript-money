@@ -3,6 +3,6 @@
   "dependencies": {
     "purescript-generics": "^3.3.0",
     "purescript-prelude": "^2.5.0",
-    "purescript-vector-spaces": "git@github.com:TinkerTravel/purescript-vector-spaces.git#^1.0.0"
+    "purescript-modules": "git@github.com:TinkerTravel/purescript-modules.git#^2.0.0"
   }
 }

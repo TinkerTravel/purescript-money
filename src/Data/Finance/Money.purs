@@ -5,7 +5,7 @@ module Data.Finance.Money
 
 import Data.Finance.Currency (kind Currency, class Currency, CProxy(..), decimals)
 import Data.Generic (class Generic)
-import Data.VectorSpace (class VectorSpace)
+import Data.Module (class LeftModule, class RightModule)
 import Prelude
 
 -- | An amount of money in the smallest discrete unit of a particular currency.
@@ -16,11 +16,17 @@ derive newtype instance eqDiscrete  :: Eq (Discrete c)
 derive newtype instance ordDiscrete :: Ord (Discrete c)
 derive instance genericDiscrete     :: Generic (Discrete c)
 
-instance vectorSpaceDiscrete :: VectorSpace (Discrete c) Int where
-  vzero = Discrete 0
-  vadd (Discrete a) (Discrete b) = Discrete (a + b)
-  vsub (Discrete a) (Discrete b) = Discrete (a - b)
-  vmul (Discrete a) b            = Discrete (a * b)
+instance leftModuleDiscrete :: LeftModule (Discrete c) Int where
+  mzeroL = Discrete 0
+  maddL (Discrete a) (Discrete b) = Discrete (a + b)
+  msubL (Discrete a) (Discrete b) = Discrete (a - b)
+  mmulL a            (Discrete b) = Discrete (a * b)
+
+instance rightModuleDiscrete :: RightModule (Discrete c) Int where
+  mzeroR = Discrete 0
+  maddR (Discrete a) (Discrete b) = Discrete (a + b)
+  msubR (Discrete a) (Discrete b) = Discrete (a - b)
+  mmulR (Discrete a) b            = Discrete (a * b)
 
 showDiscrete :: ∀ c. (Currency c) => Discrete c -> String
 showDiscrete (Discrete n) = showDiscrete' n (decimals (CProxy :: CProxy c))
