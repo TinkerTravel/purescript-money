@@ -11,7 +11,8 @@ import Prelude
 
 -- | An amount of money in the smallest discrete unit of a particular currency.
 -- | For example, `wrap 256 :: Discrete GBP` would represent £2.56, whereas
--- | `wrap 256 :: Discrete JPY` would represent ¥256.
+-- | `wrap 256 :: Discrete JPY` would represent ¥256. If you want to work with
+-- | higher granularity, you can define your own currency type.
 newtype Discrete (c :: Currency) = Discrete Int
 derive newtype instance eqDiscrete  :: Eq (Discrete c)
 derive newtype instance ordDiscrete :: Ord (Discrete c)
