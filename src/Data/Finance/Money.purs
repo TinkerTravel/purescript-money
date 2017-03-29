@@ -6,15 +6,17 @@ module Data.Finance.Money
 import Data.Finance.Currency (kind Currency, class Currency, CProxy(..), decimals)
 import Data.Generic (class Generic)
 import Data.Module (class LeftModule, class RightModule)
+import Data.Newtype (class Newtype)
 import Prelude
 
 -- | An amount of money in the smallest discrete unit of a particular currency.
--- | For example, `256 :: Discrete GBP` would represent £2.56, whereas
--- | `256 :: Discrete JPY` would represent ¥256.
+-- | For example, `wrap 256 :: Discrete GBP` would represent £2.56, whereas
+-- | `wrap 256 :: Discrete JPY` would represent ¥256.
 newtype Discrete (c :: Currency) = Discrete Int
 derive newtype instance eqDiscrete  :: Eq (Discrete c)
 derive newtype instance ordDiscrete :: Ord (Discrete c)
 derive instance genericDiscrete     :: Generic (Discrete c)
+derive instance newtypeDiscrete     :: Newtype (Discrete c) _
 
 instance leftModuleDiscrete :: LeftModule (Discrete c) Int where
   mzeroL = Discrete 0
