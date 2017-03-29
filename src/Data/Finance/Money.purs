@@ -4,7 +4,7 @@ module Data.Finance.Money
   ) where
 
 import Data.Finance.Currency (kind Currency, class Currency, CProxy(..), decimals)
-import Data.Generic (class Generic)
+import Data.Generic (class Generic, gShow)
 import Data.Module (class LeftModule, class RightModule)
 import Data.Newtype (class Newtype)
 import Prelude
@@ -17,6 +17,7 @@ derive newtype instance eqDiscrete  :: Eq (Discrete c)
 derive newtype instance ordDiscrete :: Ord (Discrete c)
 derive instance genericDiscrete     :: Generic (Discrete c)
 derive instance newtypeDiscrete     :: Newtype (Discrete c) _
+instance showDiscreteInstance :: Show (Discrete c) where show = gShow
 
 instance leftModuleDiscrete :: LeftModule (Discrete c) Int where
   mzeroL = Discrete 0
