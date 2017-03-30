@@ -36,8 +36,13 @@ instance rightModuleDiscrete :: RightModule (Discrete c) Int where
   mmulR (Discrete a) b            = Discrete (a * b)
 
 -- | Show the discrete value with the correct number of decimals. Will not
--- | prepend the currency sign. Negative numbers are prefixed with a
+-- | prepend the currency sign. Negative amounts are prefixed with a
 -- | hyphen-minus.
+-- |
+-- | Examples:
+-- |
+-- |  - `showDiscrete (Discrete   256  :: Discrete GBP) ==  "2.56"`
+-- |  - `showDiscrete (Discrete (-256) :: Discrete GBP) == "-2.56"`
 showDiscrete :: ∀ c. (Currency c) => Discrete c -> String
 showDiscrete (Discrete n) =
   unsafeToFixed d (Int.toNumber n / pow 10.0 (Int.toNumber d))
