@@ -1,13 +1,18 @@
 module Data.Finance.Money
   ( Discrete(..)
+  , formatDiscrete
   , showDiscrete
   ) where
 
-import Data.Finance.Currency (kind Currency, class Currency, CProxy(..), decimals)
+import Data.Finance.Currency (kind Currency, class Currency, CProxy(..))
+import Data.Finance.Currency as Currency
+import Data.Finance.Money.Format (Format, FormatF(..), absolute, ifNegative, literal)
+import Data.Foldable (foldMap)
 import Data.Generic (class Generic, gShow)
 import Data.Int as Int
 import Data.Module (class LeftModule, class RightModule)
 import Data.Newtype (class Newtype)
+import Data.Ord (abs)
 import Global.Unsafe (unsafeToFixed)
 import Math (pow)
 import Prelude
@@ -35,6 +40,21 @@ instance rightModuleDiscrete :: RightModule (Discrete c) Int where
   msubR (Discrete a) (Discrete b) = Discrete (a - b)
   mmulR (Discrete a) b            = Discrete (a * b)
 
+-- | Apply a format to a discrete amount.
+formatDiscrete :: ∀ c. Currency c => Format -> Discrete c -> String
+formatDiscrete f (Discrete n) = foldMap go f
+  where
+  go (IfNegative s) = if n < 0 then foldMap go s else ""
+  go (Literal s)    = s
+  go CurrencyCode   = Currency.code (CProxy :: CProxy c)
+  go Absolute       =
+    unsafeToFixed d (n' / pow 10.0 (Int.toNumber d))
+    where
+    n' = abs $ Int.toNumber n
+    d = Currency.decimals (CProxy :: CProxy c)
+
+-- | DEPRECATED: use `formatDiscrete` instead.
+-- |
 -- | Show the discrete value with the correct number of decimals. Will not
 -- | prepend the currency sign. Negative amounts are prefixed with a
 -- | hyphen-minus.
@@ -43,7 +63,5 @@ instance rightModuleDiscrete :: RightModule (Discrete c) Int where
 -- |
 -- |  - `showDiscrete (Discrete   256  :: Discrete GBP) ==  "2.56"`
 -- |  - `showDiscrete (Discrete (-256) :: Discrete GBP) == "-2.56"`
-showDiscrete :: ∀ c. (Currency c) => Discrete c -> String
-showDiscrete (Discrete n) =
-  unsafeToFixed d (Int.toNumber n / pow 10.0 (Int.toNumber d))
-  where d = decimals (CProxy :: CProxy c)
+showDiscrete :: ∀ c. Currency c => Discrete c -> String
+showDiscrete = formatDiscrete $ ifNegative (literal "-") <> absolute
