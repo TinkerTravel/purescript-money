@@ -5,8 +5,11 @@ module Data.Finance.Money
 
 import Data.Finance.Currency (kind Currency, class Currency, CProxy(..), decimals)
 import Data.Generic (class Generic, gShow)
+import Data.Int as Int
 import Data.Module (class LeftModule, class RightModule)
 import Data.Newtype (class Newtype)
+import Global.Unsafe (unsafeToFixed)
+import Math (pow)
 import Prelude
 
 -- | An amount of money in the smallest discrete unit of a particular currency.
@@ -32,7 +35,10 @@ instance rightModuleDiscrete :: RightModule (Discrete c) Int where
   msubR (Discrete a) (Discrete b) = Discrete (a - b)
   mmulR (Discrete a) b            = Discrete (a * b)
 
+-- | Show the discrete value with the correct number of decimals. Will not
+-- | prepend the currency sign. Negative numbers are prefixed with a
+-- | hyphen-minus.
 showDiscrete :: ∀ c. (Currency c) => Discrete c -> String
-showDiscrete (Discrete n) = showDiscrete' n (decimals (CProxy :: CProxy c))
-
-foreign import showDiscrete' :: Int -> Int -> String
+showDiscrete (Discrete n) =
+  unsafeToFixed d (Int.toNumber n / pow 10.0 (Int.toNumber d))
+  where d = decimals (CProxy :: CProxy c)
