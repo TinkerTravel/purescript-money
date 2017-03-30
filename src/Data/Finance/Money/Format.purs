@@ -79,7 +79,7 @@ numericC = do
   where bind = sbind
 
 -- | Accountant format, with negative amounts parenthesized, and no currency
--- | code.
+-- | indicator.
 accountant :: Format
 accountant = do
   ifNegative $ literal "("

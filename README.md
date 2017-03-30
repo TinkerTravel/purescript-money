@@ -1,3 +1,3 @@
 # purescript-money
 
-Types and operations on monetary values.
+Types and operations on monetary amounts.
