@@ -2,6 +2,13 @@ module Data.Finance.Money
   ( Discrete(..)
   , formatDiscrete
   , showDiscrete
+
+  , Dense(..)
+  , formatDense
+
+  , Rounding(..)
+  , fromDiscrete
+  , fromDense
   ) where
 
 import Data.Finance.Currency (kind Currency, class Currency, CProxy(..))
@@ -13,9 +20,13 @@ import Data.Int as Int
 import Data.Module (class LeftModule, class RightModule)
 import Data.Newtype (class Newtype)
 import Data.Ord (abs)
+import Data.Rational (Rational, (%))
+import Data.Rational as Rational
 import Global.Unsafe (unsafeToFixed)
 import Math (pow)
 import Prelude
+
+--------------------------------------------------------------------------------
 
 -- | An amount of money in the smallest discrete unit of a particular currency.
 -- | For example, `wrap 256 :: Discrete GBP` would represent £2.56, whereas
@@ -65,3 +76,51 @@ formatDiscrete f (Discrete n) = foldMap go f
 -- |  - `showDiscrete (Discrete (-256) :: Discrete GBP) == "-2.56"`
 showDiscrete :: ∀ c. Currency c => Discrete c -> String
 showDiscrete = formatDiscrete $ ifNegative (literal "-") <> absolute
+
+--------------------------------------------------------------------------------
+
+-- | Amounts of money with exact arithmetic.
+newtype Dense (c :: Currency) = Dense Rational
+derive newtype instance eqDense  :: Eq (Dense c)
+derive newtype instance ordDense :: Ord (Dense c)
+derive instance newtypeDense     :: Newtype (Dense c) _
+instance showDense :: Show (Dense c) where
+  show (Dense r) = "(Dense " <> show r <> ")"
+
+instance leftModuleDense :: LeftModule (Dense c) Rational where
+  mzeroL = Dense zero
+  maddL (Dense a) (Dense b) = Dense (a + b)
+  msubL (Dense a) (Dense b) = Dense (a - b)
+  mmulL a         (Dense b) = Dense (a * b)
+
+instance rightModuleDense :: RightModule (Dense c) Rational where
+  mzeroR = Dense zero
+  maddR (Dense a) (Dense b) = Dense (a + b)
+  msubR (Dense a) (Dense b) = Dense (a - b)
+  mmulR (Dense a) b         = Dense (a * b)
+
+formatDense :: ∀ c. Currency c => Rounding -> Format -> Dense c -> String
+formatDense r f d = formatDiscrete f $ fromDense r d
+
+--------------------------------------------------------------------------------
+
+-- | Rounding policy.
+data Rounding = Up | Down | ToZero | FromZero | Nearest
+derive instance eqRounding  :: Eq Rounding
+derive instance ordRounding :: Ord Rounding
+
+-- | Convert a discrete amount to a dense amount.
+fromDiscrete :: ∀ c. Currency c => Discrete c -> Dense c
+fromDiscrete (Discrete n) = Dense $ n % Int.pow 10 d
+  where d = Currency.decimals (CProxy :: CProxy c)
+
+-- | Convert a dense amount to a discrete amount, rounding accordingly.
+fromDense :: ∀ c. Currency c => Rounding -> Dense c -> Discrete c
+fromDense r (Dense n) = Discrete case r of
+  Up       -> Int.ceil  n'
+  Down     -> Int.floor n'
+  ToZero   -> (if n < zero then Int.ceil else Int.floor) n'
+  FromZero -> (if n > zero then Int.ceil else Int.floor) n'
+  Nearest  -> Int.round n'
+  where n' = Rational.toNumber $ n * (Int.pow 10 d % 1)
+        d  = Currency.decimals (CProxy :: CProxy c)
