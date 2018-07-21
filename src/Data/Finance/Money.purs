@@ -20,6 +20,7 @@ import Data.Int as Int
 import Data.Module (class LeftModule, class RightModule)
 import Data.Newtype (class Newtype)
 import Data.Ord (abs)
+import Data.Ratio (Ratio)
 import Data.Rational (Rational, (%))
 import Data.Rational as Rational
 import Global.Unsafe (unsafeToFixed)
@@ -87,13 +88,13 @@ derive instance newtypeDense     :: Newtype (Dense c) _
 instance showDense :: Show (Dense c) where
   show (Dense r) = "(Dense " <> show r <> ")"
 
-instance leftModuleDense :: LeftModule (Dense c) Rational where
+instance leftModuleDense :: LeftModule (Dense c) (Ratio Int) where
   mzeroL = Dense zero
   maddL (Dense a) (Dense b) = Dense (a + b)
   msubL (Dense a) (Dense b) = Dense (a - b)
   mmulL a         (Dense b) = Dense (a * b)
 
-instance rightModuleDense :: RightModule (Dense c) Rational where
+instance rightModuleDense :: RightModule (Dense c) (Ratio Int) where
   mzeroR = Dense zero
   maddR (Dense a) (Dense b) = Dense (a + b)
   msubR (Dense a) (Dense b) = Dense (a - b)
