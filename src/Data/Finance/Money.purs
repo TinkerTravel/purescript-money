@@ -11,7 +11,7 @@ module Data.Finance.Money
   , fromDense
   ) where
 
-import Data.Finance.Currency (kind Currency, class Currency, CProxy(..))
+import Data.Finance.Currency (CurrencyK, class Currency, CProxy(..))
 import Data.Finance.Currency as Currency
 import Data.Finance.Money.Format (Format, FormatF(..), absolute, ifNegative, literal)
 import Data.Foldable (foldMap)
@@ -32,7 +32,7 @@ import Prelude
 -- | For example, `wrap 256 :: Discrete GBP` would represent £2.56, whereas
 -- | `wrap 256 :: Discrete JPY` would represent ¥256. If you want to work with
 -- | higher granularity, you can define your own currency type.
-newtype Discrete (c :: Currency) = Discrete Int
+newtype Discrete (c :: CurrencyK) = Discrete Int
 derive newtype instance eqDiscrete  :: Eq (Discrete c)
 derive newtype instance ordDiscrete :: Ord (Discrete c)
 derive instance genericDiscrete     :: Generic (Discrete c)
@@ -80,7 +80,7 @@ showDiscrete = formatDiscrete $ ifNegative (literal "-") <> absolute
 --------------------------------------------------------------------------------
 
 -- | Amounts of money with exact arithmetic.
-newtype Dense (c :: Currency) = Dense Rational
+newtype Dense (c :: CurrencyK) = Dense Rational
 derive newtype instance eqDense  :: Eq (Dense c)
 derive newtype instance ordDense :: Ord (Dense c)
 derive instance newtypeDense     :: Newtype (Dense c) _
